@@ -69,9 +69,9 @@ class AmazonScraper {
     try {
       const $: CheerioSelector = await RequestPromise({
         uri: object.url,
-        method: object.method,
         form: object.formData,
         jar: this.cookieJar,
+        method: object.method,
         followAllRedirects: true,
         resolveWithFullResponse: true,
         transform(body: any) {
@@ -202,16 +202,16 @@ class AmazonScraper {
     const productPageSelector = await this.accessPage({ url: this.productUrl, method: 'GET' });
 
     const productObject = await this.processProductPage(productPageSelector);
-    const formObject = await this.getIAmazonFormObject(productPageSelector);
+    const formObject = await this.getAmazonFormObject(productPageSelector);
 
     if (!formObject) {
       throw new Error(ERROR_TYPE.NO_AMAZON_FORM);
     }
 
     const inventoryPageSelector = await this.accessPage({
-      url: formObject.formUrl,
-      method: 'POST',
       formData: formObject.formData,
+      method: 'POST',
+      url: formObject.formUrl,
     });
 
     const productObjectWithInventory: IAmazonObject = {
@@ -343,7 +343,7 @@ class AmazonScraper {
    * @returns {(IAmazonForm | null)}
    * @memberof AmazonScraper
    */
-  private getIAmazonFormObject($: CheerioSelector): IAmazonForm | null {
+  private getAmazonFormObject($: CheerioSelector): IAmazonForm | null {
     const rootUrl = Url.parse(this.productUrl);
     const formData: any = {};
 
@@ -371,7 +371,7 @@ class AmazonScraper {
       formUrl = 'https://' + rootUrl.host + formUrl;
     }
 
-    _.each(array, (object: { name: string | number; value: any; }) => {
+    _.each(array, (object: { name: string | number; value: any }) => {
       formData[object.name] = object.value;
     });
 
