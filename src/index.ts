@@ -1,9 +1,9 @@
-import _ from 'lodash';
 import cheerio from 'cheerio';
-import { IAmazonObject } from './interfaces/amazon';
+import _ from 'lodash';
 import request from 'request';
 import RequestPromise from 'request-promise-native';
 import Url from 'url';
+import { IAmazonObject } from './interfaces/amazon';
 
 enum ERROR_TYPE {
   REQUEST_FAILED = 'REQUEST_FAILED',
