@@ -276,7 +276,7 @@ class AmazonScraper {
     const salesRankItem = $(this.salesRankSelector).first();
     const salesRankElemVal = $('#SalesRank').text().trim()
   
-    const regex = /\+|-?(\d+\.\d+).([^\(]+)/;
+    const regex = /\+|-?(\d+.\d+.?).([^\(]+)/m;
 
     const mainSalesRank = +(salesRankElemVal.match(regex)[1].replace('.', ''))
 
