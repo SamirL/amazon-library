@@ -6,5 +6,5 @@ export interface IAmazonObject {
   isAvailable: boolean;
   price: number | null;
   inventorySize?: number;
-  salesRank: number;
+  salesRank: object;
 }

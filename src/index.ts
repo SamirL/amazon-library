@@ -272,8 +272,13 @@ class AmazonScraper {
    * @returns {number}
    * @memberof AmazonScraper
    */
-  private scrapeSalesRank($: CheerioSelector): number {
+  private scrapeSalesRank($: CheerioSelector): { mainSalesRank: number, secondarySalesRank: number} {
     const salesRankItem = $(this.salesRankSelector).first();
+    const salesRankElemVal = $('#SalesRank').text().trim()
+  
+    const regex = /\+|-?(\d+\.\d+).([^\(]+)/;
+
+    const mainSalesRank = +(salesRankElemVal.match(regex)[1].replace('.', ''))
 
     const salesRankStr = $(salesRankItem)
       .text()
@@ -281,9 +286,14 @@ class AmazonScraper {
       .replace('.', '')
       .replace(',', '')
       .replace('n°', '');
-    const salesRank = parseInt(salesRankStr, 2);
 
-    return salesRank;
+    const secondarySalesRank = +(salesRankStr.replace('.', ''));
+
+    return {
+      mainSalesRank,
+      secondarySalesRank
+    }
+
   }
 
   /**

@@ -6,7 +6,7 @@
     "lib": ["es2017", "es7", "es6", "dom"],
 		"moduleResolution": "node",
 		"esModuleInterop": true,
-
+    "strictNullChecks": false,
     "outDir": "./lib",
     "strict": true,
     "allowSyntheticDefaultImports": true,
