@@ -272,13 +272,19 @@ private scrapeMerchantName($: CheerioSelector): string {
       return null;
     }
 
+    let price = $(priceId).text().trim()
+
+    if (price.includes('.') && price.includes(',')) {
+      price = price.replace(',', '')
+    } else if (price.includes(',') && !price.includes('.')) {
+      price = price.replace(',', '.')
+    }
+
     return Number(
       parseFloat(
-        $(priceId)
-          .text()
+        price
           .replace('AED', '')
           .replace('EUR', '')
-          .replace(',', '.')
           .replace('£', '')
           .replace('Â', '')
           .replace('$', '')
