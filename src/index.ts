@@ -1,4 +1,5 @@
 import cheerio from 'cheerio';
+import { fchownSync, fstat, writeFileSync } from 'fs';
 import _ from 'lodash';
 import request from 'request';
 import RequestPromise from 'request-promise-native';
@@ -32,6 +33,7 @@ class AmazonScraper {
 
   private readonly titleSelector: string = 'h1#title';
   private readonly merchantIdSelector: string = '#merchantID';
+  private readonly merchantNameSelector: string = '#sellerProfileTriggerId';
   private readonly addToCardBtnSelectors: string[] = ['#addToCart', '#handleBuy'];
   private readonly priceSelectors: string[] = [
     '#priceblock_ourprice',
@@ -96,6 +98,7 @@ class AmazonScraper {
     const title = this.scrapeProductTitle($);
     const price = this.scrapeProductPrice($);
     const merchantId = this.scrapeMerchantId($);
+    const merchantName = this.scrapeMerchantName($);
     const isAvailable = this.scrapeProductAvailability($);
     const salesRank = this.scrapeSalesRank($);
     const asin = this.scrapeProductAsin($);
@@ -117,10 +120,11 @@ class AmazonScraper {
    * Scrape the Checkout Page and return the Inventory
    *
    * @param {CheerioSelector} $
+   * @param {string} asin
    * @returns {number}
    * @memberof AmazonScraper
    */
-  public processCheckoutPage($: CheerioSelector): number {
+  public processCheckoutPage($: CheerioSelector, asin: string): number {
     const htmlBody = $('body').html();
 
     if (!htmlBody) {
@@ -167,20 +171,13 @@ class AmazonScraper {
       throw new Error(ERROR_TYPE.NO_INVENTORY);
     }
 
-    const remainingInvDiv = $(this.remainingInventorySelector);
-
-    const inventoryNumber: number = Number(
-      inventoryText
-        .replace('(', '')
-        .replace(')', '')
-        .replace('articles', '')
-        .replace('article', '')
-        .replace('items', '')
-        .replace('item', ''),
-    );
+    // const remainingInvDiv = $(`div[data-asin="${asin}"]`);
+    // tslint:disable-next-line:no-console
+    // console.log(remainingInvDiv)
+    const inventoryNumber: number = Number(inventoryText);
 
     const hiddenInventoryConfirmation = Number(
-      $(remainingInvDiv)
+      $(inventoryText)
         .val()
         .split(',')[1],
     );
@@ -190,6 +187,12 @@ class AmazonScraper {
     }
 
     return inventoryNumber;
+  }
+
+  public processCartPage($: CheerioSelector, asin: string): number { 
+    const remainingInventory = $(`input[name="quantityBox"]`).val()
+
+    return Number(remainingInventory)
   }
 
   /**
@@ -214,13 +217,30 @@ class AmazonScraper {
       url: formObject.formUrl,
     });
 
+    const cartPage = await this.accessPage({
+      method: 'GET',
+      url: 'https://' + Url.parse(this.productUrl).host + '/gp/cart/view.html?ref_=nav_cart',
+    })
+
     const productObjectWithInventory: IAmazonObject = {
       ...productObject,
-      inventorySize: this.processCheckoutPage(inventoryPageSelector),
+      inventorySize: this.processCartPage(cartPage, productObject.asin),
     };
 
     return productObjectWithInventory;
   }
+
+/**
+ *  Return the Merchant Name
+ *
+ * @private
+ * @param {CheerioSelector} $
+ * @returns {(string | null)}
+ * @memberof AmazonScraper
+ */
+private scrapeMerchantName($: CheerioSelector): string {
+    return $(this.merchantNameSelector).text().trim()
+  } 
 
   /**
    * Return The Merchant Id
@@ -252,15 +272,18 @@ class AmazonScraper {
     }
 
     return Number(
-      $(priceId)
-        .text()
-        .replace('EUR', '')
-        .replace(',', '.')
-        .replace('£', '')
-        .replace('Â', '')
-        .replace('$', '')
-        .replace('€', '')
-        .trim(),
+      parseFloat(
+        $(priceId)
+          .text()
+          .replace('AED', '')
+          .replace('EUR', '')
+          .replace(',', '.')
+          .replace('£', '')
+          .replace('Â', '')
+          .replace('$', '')
+          .replace('€', '')
+          .trim(),
+      )
     );
   }
 
@@ -272,13 +295,15 @@ class AmazonScraper {
    * @returns {number}
    * @memberof AmazonScraper
    */
-  private scrapeSalesRank($: CheerioSelector): { mainSalesRank: number, secondarySalesRank: number} {
+  private scrapeSalesRank($: CheerioSelector): { mainSalesRank: number; secondarySalesRank: number } {
     const salesRankItem = $(this.salesRankSelector).first();
-    const salesRankElemVal = $('#SalesRank').text().trim()
-  
+    const salesRankElemVal = $('#SalesRank')
+      .text()
+      .trim();
+
     const regex = /\+|-?(\d+.\d+.?).([^\(]+)/m;
 
-    const mainSalesRank = +(salesRankElemVal.match(regex)[1].replace('.', ''))
+    const mainSalesRank = +salesRankElemVal.match(regex)[1].replace('.', '');
 
     const salesRankStr = $(salesRankItem)
       .text()
@@ -287,13 +312,12 @@ class AmazonScraper {
       .replace(',', '')
       .replace('n°', '');
 
-    const secondarySalesRank = +(salesRankStr.replace('.', ''));
+    const secondarySalesRank = +salesRankStr.replace('.', '');
 
     return {
       mainSalesRank,
-      secondarySalesRank
-    }
-
+      secondarySalesRank,
+    };
   }
 
   /**
