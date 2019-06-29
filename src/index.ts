@@ -106,8 +106,8 @@ class AmazonScraper {
     const productObject: IAmazonObject = {
       asin,
       isAvailable,
-      merchantName,
       merchantId,
+      merchantName,
       price,
       productUrl: this.productUrl,
       salesRank,
