@@ -43,6 +43,7 @@ class AmazonScraper {
     '#actualPriceValue .priceLarge',
   ];
   private readonly salesRankSelector = '.zg_hrsr_item .zg_hrsr_rank';
+  private readonly categorySelector = '#nav-subnav';
   private readonly alertBoxSelector = '#huc-v2-box-warning';
   private readonly confirmTextSelector = '#confirm-text';
   private readonly remainingInventorySelector = '#hucArgsNewItems';
@@ -98,6 +99,7 @@ class AmazonScraper {
     const title = this.scrapeProductTitle($);
     const price = this.scrapeProductPrice($);
     const merchantId = this.scrapeMerchantId($);
+    const category = this.scrapeCategory($);
     const merchantName = this.scrapeMerchantName($);
     const isAvailable = this.scrapeProductAvailability($);
     const salesRank = this.scrapeSalesRank($);
@@ -105,6 +107,7 @@ class AmazonScraper {
 
     const productObject: IAmazonObject = {
       asin,
+      category,
       isAvailable,
       merchantId,
       merchantName,
@@ -331,6 +334,10 @@ private scrapeMerchantName($: CheerioSelector): string {
       secondarySalesRank,
     };
   }
+
+  private scrapeCategory($: CheerioSelector): string {
+    return $(this.categorySelector).attr('data-category')
+  } 
 
   /**
    * Return the Product's Title
