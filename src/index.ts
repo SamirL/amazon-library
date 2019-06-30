@@ -336,7 +336,13 @@ private scrapeMerchantName($: CheerioSelector): string {
   }
 
   private scrapeCategory($: CheerioSelector): string {
-    return $(this.categorySelector).attr('data-category')
+    let category = $(this.categorySelector).attr('data-category')
+
+    if (!category) {
+      category = ($('option[current="parent"]').val()).replace('search-alias', '').trim()
+    }
+
+    return category
   } 
 
   /**
