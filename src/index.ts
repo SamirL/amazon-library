@@ -339,8 +339,13 @@ private scrapeMerchantName($: CheerioSelector): string {
     let category = $(this.categorySelector).attr('data-category')
 
     if (!category) {
-      category = ($('option[current="parent"]').val()).replace('search-alias', '').trim()
+      category = ($('option[current="parent"]').val()).replace('search-alias=', '').trim()
     }
+
+    // tslint:disable-next-line:no-console
+    console.log('THE CATEGORY', category)
+    // tslint:disable-next-line:no-console
+    console.log('HEY HO', $('option[current="parent"]'))
 
     return category
   } 
