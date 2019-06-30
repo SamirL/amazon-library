@@ -339,10 +339,8 @@ private scrapeMerchantName($: CheerioSelector): string {
     let category = $(this.categorySelector).attr('data-category')
 
     if (!category) {
-      category = ($('option[current="parent"]').val())
-
-      if (category) {
-        category = category.replace('search-alias=', '').trim()
+      if ($('form[name="site-search"]').find('option[current="parent"]')) {
+        category = $('form[name="site-search"]').find('option[current="parent"]').val().replace('search-alias=', '').trim()
       }
     }
 
