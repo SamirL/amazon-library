@@ -43,7 +43,7 @@ class AmazonScraper {
     '#actualPriceValue .priceLarge',
   ];
   private readonly salesRankSelector = '.zg_hrsr_item .zg_hrsr_rank';
-  private readonly categorySelector = '#nav-subnav';
+  private readonly categorySelector = '#SalesRank a';
   private readonly alertBoxSelector = '#huc-v2-box-warning';
   private readonly confirmTextSelector = '#confirm-text';
   private readonly remainingInventorySelector = '#hucArgsNewItems';
@@ -336,18 +336,9 @@ private scrapeMerchantName($: CheerioSelector): string {
   }
 
   private scrapeCategory($: CheerioSelector): string {
-    let category = $(this.categorySelector).attr('data-category')
+    const categoryMatch = $(this.categorySelector).attr('href').split('_')
 
-    if (!category) {
-      if ($('form[name="site-search"]').find('option[current="parent"]')) {
-        category = $('form[name="site-search"]').find('option[current="parent"]').val().replace('search-alias=', '').trim()
-      }
-    }
-
-    // tslint:disable-next-line:no-console
-    console.log('THE CATEGORY', category)
-    // tslint:disable-next-line:no-console
-    console.log('HEY HO', $('option[current="parent"]'))
+    const category = categoryMatch[categoryMatch.length - 1].trim()
 
     return category
   } 
