@@ -306,11 +306,16 @@ private scrapeMerchantName($: CheerioSelector): string {
     const salesRankItem = $(this.salesRankSelector).first();
     const salesRankElemVal = $('#SalesRank')
       .text()
-      .trim();
+      .trim()
+      .toLowerCase()
+      .replace('/#/gm', '')
+      .replace('/Top 100/gm', '')
+      .replace('/[.]/gm', '')
 
-    const regex = /\+|-?(\d+.\d+.?).([^\(]+)/m;
+    // const regex = /\+|-?(\d+.\d+.?).([^\(]+)/m;
+    const regex = /[-]{0,1}[\d]*[\.]{0,1}[\d]+/m;
 
-    const mainSalesRank = +salesRankElemVal.match(regex)[1].replace('.', '');
+    const mainSalesRank = +salesRankElemVal.match(regex)[0].replace('.', '');
 
     const salesRankStr = $(salesRankItem)
       .text()
