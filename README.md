@@ -16,7 +16,7 @@ npm build
 
 ````
 const AmazonScraper = require('amazon-lib/lib/index').default
-
+const url = 'YOUR AMAZON PRODUCT URL'
 const result = await new AmazonScraper(url).getFullProductInformation()
 //// Will return an object
 ///{
