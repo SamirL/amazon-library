@@ -17,6 +17,8 @@ npm build
 ````
 const AmazonScraper = require('amazon-lib/lib/index').default
 const url = 'YOUR AMAZON PRODUCT URL'
+
+;(async () => {
 const result = await new AmazonScraper(url).getFullProductInformation()
 //// Will return an object
 ///{
@@ -31,4 +33,6 @@ const result = await new AmazonScraper(url).getFullProductInformation()
 ///  inventorySize?: number;
 ///  salesRank: object;
 ///}
+})()
+
 ``````
