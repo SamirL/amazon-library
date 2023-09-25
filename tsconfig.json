@@ -8,9 +8,17 @@
 		"esModuleInterop": true,
     "strictNullChecks": false,
     "outDir": "./lib",
-    "strict": true,
+    "strict": false,
     "allowSyntheticDefaultImports": true,
+    "skipDefaultLibCheck": true,
+    "skipLibCheck": true,
+     "types": []
   },
   "include": ["src"],
-  "exclude": ["node_modules", "**/__tests__/*"]
+  "exclude": [
+    "node_modules",
+    "./node_modules",
+    "./node_modules/*",
+    "./node_modules/@types/node/index.d.ts",
+  ]
 }
