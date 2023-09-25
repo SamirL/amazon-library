@@ -346,13 +346,21 @@ class AmazonScraper {
       const title: string = $(elem).find('.prodDetSectionEntry').text().trim().toLowerCase()
 
       let value
-      if (title === 'best sellers rank') {
+      if (title === 'best sellers rank' || title.includes('classement des meilleures ventes')) {
         let rankData = []
-        const digitRegex = /#[1-9]\d*\b/gm
+        const digitRegex = /(\d+(?:\d+))/gm
+
         $(elem)
           .find('td > span > span')
           .each((i, elem) => {
-            let rank = $(elem).text().trim().match(digitRegex)[0].replace('#', '')
+            let rank = $(elem)
+              .text()
+              .trim()
+              .replaceAll('#', '')
+              .replaceAll(',', '')
+              .replaceAll('.', '')
+              .match(digitRegex)[0]
+            console.log('rank', rank)
             let category = $(elem).find('a').text().toLowerCase().replace('see top 100 in', '').trim()
             let categoryLink = $(elem).find('a').attr('href')
 
@@ -362,16 +370,25 @@ class AmazonScraper {
           })
 
         informations.salesRank = rankData
-      } else if (title === 'customer reviews') {
+      } else if (title === 'customer reviews' || title === 'moyenne des commentaires client') {
         value = $(elem)
           .find('#averageCustomerReviews')
           .text()
-          .match(/(\d+(?:\.\d+)(?=.out of 5 stars))/)[0]
+          .replaceAll(',', '.')
+          .match(/(\d+(?:[,.]\d+)[(?=.sur 5 étoiles)(?=.out of 5 stars)])/)[0]
 
-        const totalRatings = $(elem).find('#acrCustomerReviewText').text().replace('ratings', '').trim()
+        const totalRatings = $(elem)
+          .find('#acrCustomerReviewText')
+          .text()
+          .replace(',', '')
+          .replace('.', '')
+          .replace(/\s/gm, '')
+          .replace('ratings', '')
+          .replace('évaluations', '')
+          .trim()
 
         informations.ratings = { score: value, total: totalRatings }
-      } else if (title === 'date first available') {
+      } else if (title === 'date first available' || title.includes('date de mise en ligne')) {
         value = $(elem).find('td').text().trim()
         informations.createdOn = value
       }
